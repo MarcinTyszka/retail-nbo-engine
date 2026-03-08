@@ -16,21 +16,22 @@ def fetch_basket_data(engine):
     return pd.read_sql(query, engine)
 
 def prepare_market_basket(df):
-    # Group items by basket and create a boolean matrix
-    basket = (df.groupby(['basket_id', 'sub_commodity_desc'])['sub_commodity_desc']
+    # Filter out obvious staple items to find deeper purchasing patterns
+    staple_items = ['FLUID MILK PRODUCTS', 'BAKED BREAD/BUNS/ROLLS', 'BANANAS', 'EGGS']
+    df_filtered = df[~df['sub_commodity_desc'].isin(staple_items)]
+    
+    basket = (df_filtered.groupby(['basket_id', 'sub_commodity_desc'])['sub_commodity_desc']
               .count().unstack().reset_index().fillna(0)
               .set_index('basket_id'))
     
-    # Convert quantities to 1 (present) or 0 (absent)
     basket_sets = (basket > 0).astype(int)
     return basket_sets
 
 def train_association_rules(basket_sets):
-    # Generate frequent itemsets and rules using FP-growth
-    frequent_itemsets = fpgrowth(basket_sets, min_support=0.01, use_colnames=True)
-    rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
+    # Lowered support threshold to 0.2% to capture niche associations
+    frequent_itemsets = fpgrowth(basket_sets, min_support=0.002, use_colnames=True)
+    rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.5)
     
-    # Sort rules by lift to get the strongest recommendations first
     rules = rules.sort_values(by=['lift'], ascending=False)
     return rules
 

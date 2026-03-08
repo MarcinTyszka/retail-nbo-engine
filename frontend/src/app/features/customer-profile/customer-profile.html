@@ -12,15 +12,26 @@
 
     <div class="card">
       <h3>AI Analytics</h3>
-      <p><strong>Customer Segment:</strong> Cluster {{ profileData.segment }}</p>
+      <p><strong>Segment:</strong> <span class="highlight-text">{{ segmentName }}</span></p>
+      <p><em>{{ segmentDescription }}</em></p>
+      <hr>
       <p><strong>Total Spent:</strong> ${{ profileData.rfmMetrics.monetary | number:'1.2-2' }}</p>
       <p><strong>Visit Frequency:</strong> {{ profileData.rfmMetrics.frequency }} times</p>
     </div>
 
-<div class="card highlight">
+    <div class="card highlight">
       <h3>Next Best Offer (NBO)</h3>
-      <p>Suggested products for the next marketing campaign:</p>
       
+      <div class="basket-context">
+        <p><strong>Context (Recent Purchases):</strong></p>
+        <ul class="recommendation-list">
+          <li *ngFor="let item of currentBasket">{{ item }}</li>
+        </ul>
+      </div>
+
+      <hr>
+
+      <p><strong>AI Suggestions:</strong></p>
       <ul class="recommendation-list">
         <li *ngFor="let item of nboRecommendations">{{ item }}</li>
       </ul>

@@ -15,6 +15,7 @@ export class CustomerSearchComponent {
   
   searchId: number | null = null;
   customerProfile: any = null;
+  currentBasket: string[] = []
   recommendations: string[] = [];
   errorMessage: string = '';
 
@@ -23,15 +24,15 @@ export class CustomerSearchComponent {
     private cdr: ChangeDetectorRef
   ) {}
 
-  onSearch() {
+onSearch() {
     if (!this.searchId) return;
-
     this.resetState();
 
     this.apiService.getCustomerProfile(this.searchId).subscribe({
       next: (data) => {
         this.customerProfile = data;
-        this.fetchRecommendations(['MILK', 'BREAD']);
+        this.currentBasket = data.currentBasket || [];
+        this.recommendations = data.recommendations || [];
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -40,6 +41,14 @@ export class CustomerSearchComponent {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private resetState() {
+    this.errorMessage = '';
+    this.customerProfile = null;
+    this.currentBasket = [];
+    this.recommendations = [];
+    this.cdr.detectChanges();
   }
 
   fetchRecommendations(basket: string[]) {
@@ -55,10 +64,5 @@ export class CustomerSearchComponent {
     });
   }
 
-  private resetState() {
-    this.errorMessage = '';
-    this.customerProfile = null;
-    this.recommendations = [];
-    this.cdr.detectChanges();
-  }
+
 }

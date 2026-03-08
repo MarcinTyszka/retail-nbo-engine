@@ -48,13 +48,13 @@ def get_customer_segment(household_key: int):
 
 @app.post("/api/nbo")
 def get_next_best_offer(request: NBORequest):
-    # Match current basket with association rules
     items = set(request.basket_items)
-    
     matching_rules = nbo_rules[nbo_rules['antecedents'].apply(lambda x: x.issubset(items))]
     
+    # Fallback strategy when no specific association rules are met
     if matching_rules.empty:
-        return {"recommendations": []}
+        fallback_recommendations = ["PREMIUM COFFEE", "GREEK YOGURT", "FRESH BERRIES"]
+        return {"recommendations": fallback_recommendations}
         
     top_rules = matching_rules.sort_values('lift', ascending=False).head(3)
     recommendations = []
