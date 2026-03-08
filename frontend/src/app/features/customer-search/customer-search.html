@@ -1,0 +1,21 @@
+<div class="search-container">
+  <h2>NBO Engine Dashboard</h2>
+  
+  <div class="search-box">
+    <input 
+      type="number" 
+      [(ngModel)]="searchId" 
+      placeholder="Enter Household ID (e.g., 1)" 
+      class="search-input"
+      (keyup.enter)="onSearch()" />
+      
+    <button (click)="onSearch()" class="btn-search">Search Customer</button>
+  </div>
+  
+  <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>
+
+<app-customer-profile
+  [profileData]="customerProfile"
+  [nboRecommendations]="recommendations">
+</app-customer-profile>

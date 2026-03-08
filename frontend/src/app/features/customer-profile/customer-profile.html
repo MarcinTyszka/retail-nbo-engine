@@ -1,0 +1,38 @@
+<div class="profile-dashboard" *ngIf="profileData">
+  <h2>Customer 360 Profile</h2>
+  
+  <div class="dashboard-grid">
+    
+    <div class="card">
+      <h3>Demographics</h3>
+      <p><strong>Age:</strong> {{ profileData.demographics.ageDesc }}</p>
+      <p><strong>Income:</strong> {{ profileData.demographics.incomeDesc }}</p>
+      <p><strong>Family Size:</strong> {{ profileData.demographics.householdSizeDesc }}</p>
+    </div>
+
+    <div class="card">
+      <h3>AI Analytics</h3>
+      <p><strong>Customer Segment:</strong> Cluster {{ profileData.segment }}</p>
+      <p><strong>Total Spent:</strong> ${{ profileData.rfmMetrics.monetary | number:'1.2-2' }}</p>
+      <p><strong>Visit Frequency:</strong> {{ profileData.rfmMetrics.frequency }} times</p>
+    </div>
+
+<div class="card highlight">
+      <h3>Next Best Offer (NBO)</h3>
+      <p>Suggested products for the next marketing campaign:</p>
+      
+      <ul class="recommendation-list">
+        <li *ngFor="let item of nboRecommendations">{{ item }}</li>
+      </ul>
+      
+      <button class="btn-primary" (click)="onGenerateCampaign()" [disabled]="campaignSent">
+        {{ campaignSent ? 'Sending...' : 'Generate Discount Campaign' }}
+      </button>
+
+      <div class="success-alert" *ngIf="campaignSent">
+        Campaign successfully sent to Household #{{ profileData.demographics.householdKey }}!
+      </div>
+    </div>
+
+  </div>
+</div>
