@@ -1,11 +1,25 @@
 import pandas as pd
 from sqlalchemy import create_engine
 import os
+import zipfile
 
-DB_URI = 'postgresql://admin:adminpassword@localhost:5432/nbo_database'
+DB_URI = os.getenv('DB_URI', 'postgresql://admin:adminpassword@localhost:5432/nbo_database')
+
+def extract_dataset(dataset_dir):
+    # Extracts data.zip if transaction_data.csv is missing
+    zip_path = os.path.join(dataset_dir, 'data.zip')
+    test_file = os.path.join(dataset_dir, 'transaction_data.csv')
+    
+    if not os.path.exists(test_file):
+        if os.path.exists(zip_path):
+            print(f"Extracting {zip_path}...")
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(dataset_dir)
+            print("Extraction complete.")
+        else:
+            print(f"Warning: Missing both CSV files and {zip_path} in {dataset_dir}.")
 
 def load_csv_to_postgres(file_path, table_name, engine):
-    # Validates file existence and loads data into PostgreSQL in chunks
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
         return
@@ -13,16 +27,27 @@ def load_csv_to_postgres(file_path, table_name, engine):
     print(f"Loading {file_path} into {table_name}...")
     
     chunk_size = 100000
+    first_chunk = True
+    
     for chunk in pd.read_csv(file_path, chunksize=chunk_size):
         chunk.columns = [col.lower() for col in chunk.columns]
-        chunk.to_sql(table_name, engine, if_exists='append', index=False)
         
+        # Replace table on the first chunk, append subsequent chunks
+        if first_chunk:
+            chunk.to_sql(table_name, engine, if_exists='replace', index=False)
+            first_chunk = False
+        else:
+            chunk.to_sql(table_name, engine, if_exists='append', index=False)
+            
     print(f"Finished loading {table_name}.")
 
 def main():
-    # Establishes DB connection and processes the required dataset files
     engine = create_engine(DB_URI)
-    dataset_dir = 'dataset'
+    
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    dataset_dir = os.path.join(base_dir, 'dataset')
+    
+    extract_dataset(dataset_dir)
     
     files_to_load = {
         'hh_demographic.csv': 'households',

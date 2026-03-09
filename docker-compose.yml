@@ -1,10 +1,8 @@
-# Configures PostgreSQL database and pgAdmin UI for local development
-version: '3.8'
 
 services:
   postgres_db:
     image: postgres:15
-    container_name: retail_postgres
+    container_name: nbo_postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpassword
@@ -15,17 +13,67 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - nbo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d nbo_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: retail_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: adminpassword
-    ports:
-      - "5050:80"
+  data_loader:
+    build:
+      context: .
+      dockerfile: data_engineering/Dockerfile
+    container_name: nbo_data_loader
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
+    environment:
+      - DB_URI=postgresql://admin:adminpassword@postgres_db:5432/nbo_database
+    volumes:
+      - .:/app
+    networks:
+      - nbo_network
+
+  ml_service:
+    build: 
+      context: ./ml_service
+      dockerfile: Dockerfile
+    container_name: nbo_ml_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      data_loader:
+        condition: service_completed_successfully
+    environment:
+      - DB_URI=postgresql://admin:adminpassword@postgres_db:5432/nbo_database
+    networks:
+      - nbo_network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nbo_crm_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      ml_service:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_db:5432/nbo_database
+      - NBO_AI_SERVICE_URL=http://ml_service:8000
+    networks:
+      - nbo_network
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nbo_frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
     networks:
       - nbo_network
 

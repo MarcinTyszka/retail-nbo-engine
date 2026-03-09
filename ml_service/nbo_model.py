@@ -2,8 +2,9 @@ import pandas as pd
 from sqlalchemy import create_engine
 from mlxtend.frequent_patterns import fpgrowth, association_rules
 import joblib
+import os
 
-DB_URI = 'postgresql://admin:adminpassword@localhost:5432/nbo_database'
+DB_URI = os.getenv('DB_URI', 'postgresql://admin:adminpassword@localhost:5432/nbo_database')
 
 def fetch_basket_data(engine):
     # Fetch transaction subset joined with products to get categories

@@ -3,10 +3,11 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 from sqlalchemy import create_engine
+import os
 
 app = FastAPI(title="NBO Engine ML API", version="1.0.0")
 
-DB_URI = 'postgresql://admin:adminpassword@localhost:5432/nbo_database'
+DB_URI = os.getenv('DB_URI', 'postgresql://admin:adminpassword@localhost:5432/nbo_database')
 engine = create_engine(DB_URI)
 
 # Load ML artifacts globally on startup

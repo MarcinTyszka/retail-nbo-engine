@@ -15,12 +15,10 @@ Thumbs.db
 *.sln
 
 # Datasets and large files
-dataset/
-data/
-*.csv
-*.parquet
-*.zip
-*.tar.gz
+
+# Ignore raw CSV data to avoid GitHub size limits
+dataset/*.csv
+!dataset/data.zip
 
 # Python / Machine Learning / FastAPI
 __pycache__/

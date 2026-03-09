@@ -28,31 +28,27 @@ The project follows a modern microservices architecture:
 
 This project utilizes the industry-standard **Dunnhumby "The Complete Journey"** dataset, which contains over 2.5 million household-level transactions.
 
-**Handling Large Data on GitHub !!Not implemented yet!!:** 
+**Handling Large Data on GitHub:** 
 Due to GitHub's file size limits, the raw `.csv` files have been compressed into `data.zip` (located in `ml_service/data/`). 
 You do not need to manually download or extract anything. The Dockerized Python service is configured to automatically unzip this archive, run the ETL pipeline, train the ML models, and populate the PostgreSQL database upon the first container startup.
 
-## Quick Start (Zero-Setup Deployment) !!Not implemented yet!!
+## Quick Start (Zero-Setup Deployment)
 
 The entire infrastructure is fully containerized using Docker multi-stage builds. You do not need Java, Python, Node.js, or PostgreSQL installed on your local machine.
 
 ### Prerequisites
 * Docker and Docker Compose installed.
 
-### Run Instructions !!Not implemented yet!!
+### Run Instructions
 1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/MarcinTyszka/nbo-engine.git](https://github.com/MarcinTyszka/nbo-engine.git)
-    cd nbo-engine
-    ```
+
 2.  Build and start all services:
     ```bash
     docker-compose up --build -d
     ```
 3.  Wait a moment for the data to be seeded and models to be trained. Then, access the application:
     * **Frontend Dashboard**: http://localhost:4200
-    * **FastAPI Swagger UI**: http://localhost:8000/docs
-    * **Spring Boot Backend**: http://localhost:8080
+
 
 ## Technology Stack
 
